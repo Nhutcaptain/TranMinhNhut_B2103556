@@ -1,8 +1,6 @@
 <template>
     <ul class="cart-list">
-        <div class="title">
-            <h2>GIỎ HÀNG</h2>
-        </div>
+       
         <li class="cart-list-item" v-for="(product, index) in products" :key="product._id"
             :class="{ active: index === activeIndex }">
             <div class="items">
@@ -20,13 +18,13 @@
                         <strong>Tác giả:</strong> {{ product.author }}
                     </div>
                     <div class="item-detail">
-                        <strong>Giá:</strong> {{ product.price }}
+                        <strong>Giá:</strong> {{ formatNumber(product.price) }} VNĐ
                     </div>
                     <div class="item-detail">
                         <strong>Số lượng:</strong> {{ product.count }}
                     </div>
                     <div class="item-detail">
-                        <strong>Tổng:</strong> {{ product.price * product.count }}
+                        <strong>Tổng:</strong> {{ formatNumber(product.price * product.count) }} VNĐ
                     </div>
                     <i class="fa-solid fa-trash trash-icon" @click="getDeleted(index)" data-bs-toggle="modal"
                         data-bs-target="#myModal"></i>
@@ -34,9 +32,12 @@
                 <div class="describe-item">
                     <strong>Mô tả:</strong> {{ product.describe }}
                 </div>
-                <div :class="{ 'buy': !checkProductCount(product), 'bough': checkProductCount(product) }">
+                <div :class="{ 'buy': !checkProductCount(product), 'bough': checkProductCount(product) }" v-if="!product.vanchuyen">
                     <button data-bs-toggle="modal" data-bs-target="#myModalPay" @click="getTempIndex(index)">Thanh
                         toán</button>
+                    <p style="font-weight: bold;">Chờ chốt đơn...</p>
+                </div>
+                <div class="accepted" v-if="product.vanchuyen">
                     <p style="font-weight: bold;">Đang vận chuyển...</p>
                 </div>
             </div>
@@ -103,6 +104,16 @@ export default {
             deleted: false,
             productid: '',
             tempIndex: null,
+            cost:'',
+            order: {
+                userID: '',
+                productId:'',
+                name:'',
+                price:'',
+                count:'',
+                confirmed:'',
+                ngaythem:'',
+            }
         }
     },
     methods: {
@@ -147,7 +158,10 @@ export default {
                     localProduct.bought = true;
                     localProduct.ngaythem = formattedDate;
                     await bookstoreService.deleteCartCount(localProduct._id, localProduct);
-                    console.log(localProduct);
+                    this.order = localProduct;
+                    const user = await bookstoreService.get(localProduct.userID);
+                    this.order.username = user.name;
+                    await bookstoreService.createOrder(this.order);
                 }
             } catch (error) {
                 console.log(error);
@@ -163,10 +177,14 @@ export default {
                 text: "Chức năng này sẽ được phát triển trong tương lai!",
                 icon: "info"
             });
-        }
+        },
+
+        formatNumber(number) {
+            return number.toLocaleString();
+        },
     },
     mounted() {
-
+        
     }
 }
 </script>
@@ -228,11 +246,5 @@ export default {
     cursor: pointer;
 }
 
-.title {
-    position: relative;
-    margin-top: 5px;
-    padding: 10px 0;
-    border: 1px solid;
-    border-radius: 50px;
-}
+
 </style>

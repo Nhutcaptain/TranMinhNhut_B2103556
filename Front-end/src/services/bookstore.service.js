@@ -51,6 +51,10 @@ async getOneCart(id1, id2) {
     return (await this.api.get(`/home/${id1}/${id2}/product`)).data;
 }
 
+async getOneCartByPro(id) {
+    return (await this.api.get(`/home/${id}/product`)).data;
+}
+
 async updateCart(id1,id2,data) {
     return (await axios.put(`/api/bookstore/home/${id1}/${id2}/product`,data)).data
 }
@@ -82,5 +86,37 @@ async deleteCart(id) {
 async deleteCartbyProductId(id) {
     return (await this.api.delete(`/cart/${id}`)).data;
 }
+
+async createOrder(data) {
+    return (await axios.post('/api/bookstore/manager/order',data)).data;
 }
+async updateOrder(id, data) {
+    return (await axios.put(`/api/bookstore/manager/order/${id}`,data));
+}
+async getAllInvoice(){
+    return (await this.api.get('/manager/order/')).data;
+}
+
+async getPaymentHistory(id) {
+    return (await this.api.get(`/home/${id}/history/`)).data;
+}
+
+async getReport(id) {
+    console.log(id);
+    return (await this.api.get(`/home/comment/${id}`)).data;
+}
+
+async postComment(data) {
+    return (await axios.post('/api/bookstore/home/comment/',data)).data;
+}
+
+async sendRequireMail(data) {
+    return (await axios.post('/api/bookstore/sendMail/',data)).data;
+}
+
+async deleteInvoices(id) {
+    return (await this.api.delete(`/manager/order/${id}`)).data;
+}
+}
+
 export default new BookstoreService();

@@ -50,7 +50,7 @@ export default {
         <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#myModalCart">Các đơn hàng đã thanh toán</button>
     </div>
     <div class="modal fade" id="myModalCart">
-                <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
                     <div class="modal-content">
 
                         <!-- Modal body -->

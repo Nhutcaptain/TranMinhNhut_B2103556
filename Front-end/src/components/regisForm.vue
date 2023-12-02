@@ -1,32 +1,47 @@
 <template>
     <Form @submit="submitUser" :validation-schema="contactFormSchema">
-        <h2 v-if="!contactLocal._id">Đăng ký</h2>
         <h2 v-if="contactLocal._id">Chỉnh sửa thông tin</h2>
+        <div v-if="contactLocal.avatar" class="rounded-circle avatar-output" @click="selectAvatar">
+            <img :src="contactLocal.avatar" alt="" class="rounded-circle" >
+            <i class="fa-solid fa-pen re-select-avatar-icon"></i>
+        </div> 
+        <div v-if="!contactLocal.avatar && contactLocal._id" class="avatar-input" @click="selectAvatar">
+            <i class="fa-regular fa-image avatar-icon" ></i>
+            
+        </div>
+        <input type="file" name="file" class="file" ref="fileInput" @change="onChange">
         <div class="input-section">
-            <Field name="name" type="text" class="form-control" v-model="contactLocal.name" placeholder="Nhập họ tên" />
+            <Field name="name" type="text" class="form-control" v-model="contactLocal.name" placeholder="Họ tên" />
             <ErrorMessage name="name" class="error-feedback" />
         </div>
         <div class="input-section">
-            <Field name="email" type="email" class="form-control" v-model="contactLocal.email" placeholder="Nhập email" />
+            <Field name="email" type="email" class="form-control" v-model="contactLocal.email" placeholder="Địa chỉ Email" />
             <ErrorMessage name="email" class="error-feedback" />
         </div>
         <div class="input-section">
             <Field name="address" type="text" class="form-control" v-model="contactLocal.address"
-                placeholder="Nhập địa chỉ" />
+                placeholder="Địa chỉ nhà" />
             <ErrorMessage name="address" class="error-feedback" />
         </div>
 
         <div class="input-section">
             <Field name="phone" type="phone" class="form-control" v-model="contactLocal.phone"
-                placeholder="Nhập số điện thoại" />
+                placeholder="Số điện thoại" />
             <ErrorMessage name="phone" class="error-feedback" />
         </div>
 
         <div class="input-section">
-            <Field name="password" type="password" class="form-control" v-model="contactLocal.password"
-                placeholder="Nhập mật khẩu" />
-            <ErrorMessage name="password" class="error-feedback" />
+            <div class="input-password">
+                <Field name="password" type="password" class="form-control" id="passWords" v-model="contactLocal.password"
+                placeholder="Mật khẩu" /> 
+                <ErrorMessage name="password" class="error-feedback" />
+            </div>
+            
         </div>
+        <div :class="{'show-password': contactLocal._id, 'show-password-signup': !contactLocal._id}">
+                    <i class="fa-regular fa-eye" @click="showPassword" v-if="!showpass"></i>
+                    <i class="fa-regular fa-eye-slash" @click="showPassword" v-if="showpass"></i>
+                </div>
         <button class="btn btn-primary" id="btn-register" v-if="!contactLocal._id">Đăng ký</button>
         <button class="btn btn-primary" v-if="contactLocal._id">Lưu</button>
     </Form>
@@ -74,6 +89,7 @@ export default {
             contactLocal: this.contact,
             contactFormSchema,
             listContact: [],
+            showpass: false,
         };
     },
     methods: {
@@ -90,6 +106,31 @@ export default {
                 }
             this.$emit("submit:contact", this.contactLocal);
             
+        },
+
+        selectAvatar() {
+            this.$refs.fileInput.click();
+        },
+
+        onChange(event) {
+            const files = event.target.files[0];
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    this.contactLocal.avatar = event.target.result;
+                };
+                reader.readAsDataURL(files);
+        },
+
+        showPassword() {
+            const PassInput = document.getElementById('passWords');
+            if(PassInput.type === 'password'){
+                this.showpass = true;
+                PassInput.type = 'text';
+            } else {
+                this.showpass = false;
+                PassInput.type = 'password';
+            }
+
         },
 
         async retrieveContacts() {
@@ -126,7 +167,29 @@ export default {
 </script>
 
 <style scoped>
-.form-control {
-    margin: 10px 10px;
+.file{
+    display: none;
+}
+.input-section{
+    position: relative;
+    margin-bottom: 10px;
+    margin-top: 5px;
+    text-align: left;
+    max-width: 270px;
+    width: 250px;
+    border-bottom: 1px solid;
+}
+.show-password{
+    position: absolute;
+    bottom: 70px;
+    right: 90px;
+}
+.form-control{
+    border: none;
+}
+.show-password-signup{
+    position: absolute;
+    bottom: 25%;
+    right: 7%;
 }
 </style>

@@ -34,8 +34,17 @@ router.route("/home/:id")
 
 router.route("/home/:id1/:id2/product")
     .post(contacts.createCart)
-    .put(contacts.updateCart)
-    .get(contacts.findOneCart);
+    .get(contacts.findOneCart)
+    .put(contacts.updateCart);
+
+router.route("/home/comment")
+    .post(contacts.createComment);
+
+router.route("/home/comment/:id")
+    .get(contacts.getComment);
+
+router.route("/home/:id/product")
+    .get(contacts.findByProductId);
 
 router.route("/home/:id/cart")
     .get(contacts.findAllCart)
@@ -48,4 +57,18 @@ router.route("/home/cart/:id")
     .delete(contacts.deleteCart);
 router.route("/cart/:id")
     .delete(contacts.deleteCartbyProductId);
+
+router.route("/manager/order")
+    .get(contacts.findAllInvoice)
+    .post(contacts.createOrder);
+
+router.route("/manager/order/:id/")
+    .put(contacts.updateOrder)
+    .delete(contacts.deleteInvoice);
+
+router.route('/home/:id/history')
+    .get(contacts.getHistory);
+
+router.route('/sendMail')
+    .post(contacts.sendEmail);
 module.exports = router;

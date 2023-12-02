@@ -13,11 +13,10 @@
             
         </div> -->
             <div class="icon">
-                
+
                 <div class="dropdown dropstart">
                     <div class="dropdown-tooltip" data-bs-toggle="dropdown">
-                        <i class="fa-solid fa-sort" data-bs-toggle="tooltip" data-bs-placement="bottom"
-                            title="Sắp xếp"></i>
+                        <i class="fa-solid fa-sort" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Sắp xếp"></i>
                     </div>
                     <ul class="dropdown-menu">
                         <li class="dropdown-item" @click="sortItem('increase')">
@@ -36,15 +35,16 @@
                     </div>
                 </div>
                 <div class="manager" v-if="checkAdmin">
-                    <i class="fa-solid fa-people-roof" @click="manager" data-bs-toggle="tooltip"
-                    data-bs-placement="bottom" title="Trang quản lý" ref="managerIcon"></i>
+                    <i class="fa-solid fa-people-roof" @click="manager" data-bs-toggle="tooltip" data-bs-placement="bottom"
+                        title="Trang quản lý" ref="managerIcon"></i>
                 </div>
                 <div class="dropdown">
                     <i class="fa-solid fa-bars" data-bs-toggle="dropdown"></i>
                     <ul class="dropdown-menu">
                         <li class="dropdown-item">
-                            <div class="profile-icon" data-bs-toggle="modal" data-bs-target="#myModalProfile" @click="unchange">
-                                <i class="fa fa-user" aria-hidden="true" ></i>Thông tin
+                            <div class="profile-icon" data-bs-toggle="modal" data-bs-target="#myModalProfile"
+                                @click="unchange">
+                                <i class="fa fa-user" aria-hidden="true"></i>Thông tin
                             </div>
                         </li>
                         <li class="dropdown-item">
@@ -81,7 +81,8 @@
 
                         <!-- Modal footer -->
                         <div class="modal-footer">
-                            <button class="btn btn-warning" @click="change"> <i class="fa-solid fa-pen-to-square"></i>Chỉnh sửa</button>
+                            <button class="btn btn-warning" @click="change"> <i class="fa-solid fa-pen-to-square"></i>Chỉnh
+                                sửa</button>
                             <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
                         </div>
 
@@ -115,23 +116,21 @@
 
     </div>
     <div class="app-body">
-        <ProductList ref="productList" :products="filteredProduct" v-model:activeIndex="activeIndex" :userId="getId"
+        <div class="highlighted-products"  v-if="!searchText" @click="changeProductClick('topProduct')">
+            <h2>Top sản phẩm nổi bật</h2>
+            <ProductList :products="topProducts" v-model:activeIndex="activeIndex" :userId="getId" v-model="keyCount"
+                :getCheck="getCheck" >
+            </ProductList>
+        </div>
+        <h2>Tất cả sản phẩm</h2>
+        <div class="all-product" @click="changeProductClick('')">
+            <ProductList ref="productList" :products="filteredProduct" v-model:activeIndex="activeIndex" :userId="getId"
             v-model="keyCount" :getCheck="getCheck" @product-id-selected="handleProductIdSelected">
         </ProductList>
-        <!-- <div class="overlays" v-if="activeProduct" @click="closeDetailProduct"></div>
-        <div class="detail-product" v-if="activeProduct">
-            <div class="close-detail-product">
-                <i class="fa-solid fa-circle-xmark close-icon" @click="closeDetailProduct" title="Đóng"></i>
-            </div>
-            <div class="detail-header">
-                <h2>Thông tin chi tiết</h2>
-            </div>
-            <div class="detail-body">
-                <Detail :productDetail="activeProduct" :id="userId"></Detail>
-            </div>
-        </div> -->
+        </div>
+
         <div class="modal fade" id="myModal3">
-            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h2>Thông tin chi tiết sách</h2>
@@ -139,7 +138,13 @@
                     </div>
                     <div class="modal-body">
                         <div class="product-detail-body" v-if="activeProduct">
-                            <Detail :productDetail="activeProduct" :id="userId"></Detail>
+                            <Detail :productDetail="activeProduct" :userID="userId" :isComment="true"></Detail>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="edit">
+                            <i class="fa-solid fa-pen-to-square" @click="doEdit" data-bs-toggle="modal"
+                                data-bs-target="#myModal3" v-if="checkAdmin"></i>
                         </div>
                     </div>
                 </div>
@@ -190,8 +195,7 @@ import CartCount from '../components/CartCount.vue';
 import Swal from 'sweetalert2';
 import unidecode from 'unidecode';
 import Detail from '../components/Detail.vue';
-import { Tooltip } from 'bootstrap'
-// import { createApp, ref, onMounted } from 'vue';
+import { Tooltip } from 'bootstrap';
 
 export default {
     props: {
@@ -213,6 +217,7 @@ export default {
             this.totalCountKey++;
             this.keyCount = 0;
         },
+        activeIndex: 'test',
     },
     data() {
         return {
@@ -234,7 +239,8 @@ export default {
             totalCountKey: 0,
             getCheck: false,
             productSelected: [],
-            isEdit:false,
+            isEdit: false,
+            productClick:'',
         }
     },
     computed: {
@@ -254,13 +260,25 @@ export default {
             const searchTextLower = unidecode(this.searchText).toLowerCase(); // Chuyển searchText thành chuỗi không dấu và chữ thường
             return this.products.filter((_product, index) => this.productString[index].includes(searchTextLower));
         },
+
+        topProducts() {
+            const temp = this.products.slice().sort((a, b) => b.revenue - a.revenue);
+            return temp.slice(0, 4);
+        },
+
+        newProducts() {
+            const temp = this.products.slice().reverse();
+            return temp.slice(0, 5);
+        },
         activeProduct() {
             if (this.activeIndex < 0) return null;
-            return this.filteredProduct[this.activeIndex];
+            return this.filteredProduct[this.convertToOriginalIndex()];
         },
+
         getId() {
             return this.id;
-        }
+        },
+        
     },
     methods: {
         createProduct(data) {
@@ -381,10 +399,13 @@ export default {
             const managerIcon = this.$refs.managerIcon;
             const tooltipInstance = Tooltip.getInstance(managerIcon);
             tooltipInstance.hide();
-            this.$router.push({name: 'manager'});
+            this.$router.push({
+                name: 'manager',
+                query: { userID: this.id }
+            });
         },
         change() {
-            if(this.isEdit) {
+            if (this.isEdit) {
                 this.isEdit = false
             } else {
                 this.isEdit = true;
@@ -397,7 +418,31 @@ export default {
             console.log(this.user);
             await bookstoreService.updateUser(this.id, this.user);
             alert('Chỉnh sửa thông tin thành công');
-        }
+        },
+
+        doEdit() {
+            this.$router.push({
+                name: 'editor',
+                params: { productId: this.products[this.activeIndex]._id },
+            })
+        },
+        changeProductClick(value){
+            this.productClick = value;  
+        },
+        convertToOriginalIndex() {
+            if(this.activeIndex === undefined || this.activeIndex === null) {
+                return -1;
+            }
+            if(this.productClick == 'topProduct'){
+                const productIdInTopProducts = this.topProducts[this.activeIndex]._id;
+                return this.products.findIndex((product) => product._id === productIdInTopProducts);
+            }
+            if(this.productClick == 'newProduct') {
+                const productIdInTopProducts = this.newProducts[this.activeIndex]._id;
+                return this.products.findIndex((product) => product._id === productIdInTopProducts);
+            }
+            return this.activeIndex;
+        },
     },
     mounted() {
         this.refreshList();

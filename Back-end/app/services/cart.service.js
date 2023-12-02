@@ -18,6 +18,7 @@ class CartService {
             count: payload.count,
             bought: payload.bought,
             ngaythem: payload.ngaythem,
+            vanchuyen: payload.vanchuyen,
         };
         Object.keys(cart).forEach(
             (key) => cart[key] === undefined && delete cart[key]
@@ -45,15 +46,27 @@ class CartService {
         const cart  = this.extractCartData(payload);
         const result = await this.Cart.findOneAndUpdate(
             cart,
-            { $set: { bought: cart.bought === true} },
+            { $set: { bought: cart.bought === true, vanchuyen: cart.vanchuyen === true} },
             { returnDocument: "after", upsert: true}
         );
         return result;
     }
-    async findByUserId(userID,productId) {
+    async findByUserId(userID, productId) {
         try{
             const query = {
                 userID: userID,
+                productId: productId
+            };
+            const cart = await this.Cart.findOne(query);
+            return cart;
+        }catch(error) {
+            console.log(error);
+        }
+    }
+
+    async findByProductId(productId) {
+        try{
+            const query = {
                 productId: productId
             };
             const cart = await this.Cart.findOne(query);

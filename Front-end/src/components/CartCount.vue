@@ -30,7 +30,7 @@ export default {
   methods: {
     async fetchCartData() {
       try {
-        // Gọi dịch vụ để lấy giỏ hàng dựa trên userID
+        //lấy giỏ hàng dựa trên userID
         const cartData = await bookstoreService.getAllCart(this.userID);
         
         // Tính tổng số lượng sản phẩm trong giỏ hàng

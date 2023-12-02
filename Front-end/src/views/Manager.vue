@@ -2,6 +2,20 @@
         <div class="manager-body">
             <div class="manager-body-header">
                 <h2>TRANG QUẢN LÝ KHÁCH HÀNG</h2>
+                <div class="navation">
+                    <div class="invoice-manager">
+                    <router-link :to="{
+                        name: 'invoice',
+                    }" class="invoice">
+                    Quản lý hóa đơn</router-link> |
+                </div>
+                <div class="product-manager">
+                    <router-link :to=" {
+                        name: 'productManager',
+                        query: {userID: this.userID}
+                    }" class="product-manager-link">Quản lý sản phẩm</router-link>
+                </div> 
+            </div>
             </div>
             <div class="main-contents">
             <div class="left-content">
@@ -30,10 +44,13 @@
             UserList,
             UserInfo,
         },
+        props: {
+            userID: {type: String},
+        },
         data() {
             return {
                 users: [],
-                activeIndex:'',
+                activeIndex:-1,
             }
         },
         computed: {
@@ -50,6 +67,7 @@
             async retriveUserList() {
                 try{
                     this.users = await bookstoreService.getAll();
+                    
                 }catch(error) {
                     console.log(error);
                 }

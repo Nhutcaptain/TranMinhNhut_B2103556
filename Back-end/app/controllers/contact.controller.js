@@ -5,6 +5,9 @@ const ProductService = require("../services/products.service");
 const upload = require("../utils/upload.util");
 const { ExplainVerbosity } = require("mongodb");
 const CartService = require('../services/cart.service');
+const OrderService = require('../services/order.service');
+const CommentService = require('../services/comment.service');
+const nodemailer = require("nodemailer");
 
 exports.create = (req, res) => {
     console.log("Đây là create Handle");
@@ -193,6 +196,7 @@ exports.findOneProduct = async (req, res, next) => {
 exports.findOneCart = async (req, res, next) => {
     try{
         const cartService = new CartService(MongoDB.client);
+       
         const document = await cartService.findByUserId(req.params.id1, req.params.id2);
         // console.log(document);
         if(!document) {
@@ -204,6 +208,25 @@ exports.findOneCart = async (req, res, next) => {
         return next( new ApiError(500,"Lỗi khi truy xuất sản phẩm với id = "+req.params.id))
     }
 }
+
+exports.findByProductId = async (req, res, next) => {
+    try{
+        const cartService = new CartService(MongoDB.client);
+       
+        const document = await cartService.findByProductId(req.params.id);
+        // console.log(document);
+        if(!document) {
+            return next(new ApiError(404, "Lỗi rồi nè"));
+        }
+
+        return res.send(document);
+    } catch(error) {
+        return next( new ApiError(500,"Lỗi khi truy xuất sản phẩm với id = "+req.params.id))
+    }
+}
+
+
+
 
 exports.findOneCartById = async (req, res, next) => {
     try{
@@ -410,4 +433,160 @@ exports.reUpdateCart = async (req, res, next) => {
     } catch (error) {
         return next( new ApiError(500, "Error updating contact with id = " + req.params.id));
     }
+};
+
+exports.createOrder = async (req, res, next) => {
+    try{ 
+        const orderService = new OrderService(MongoDB.client);
+        const documents = await orderService.createOrder(req.body);
+        if(!documents) {
+            console.log('Lỗi ở dòng 421');
+        }
+        return res.send(documents);
+        
+    } catch(error) {
+        console.log('An error found!',error)
+        return next(
+            new ApiError(500, "An error occured while creating the contact")
+        );
+    }
+};
+
+exports.findAllInvoice = async (req, res, next) => {
+    try {
+        const orderService = new OrderService(MongoDB.client);
+        const {name} = req.query;
+        if(name) {
+            documents = await orderService.findByName(name); 
+        } else {
+            documents = await orderService.find({});    
+        }
+    } catch (error) {
+        console.log(error);
+        return next(
+            new ApiError(500, "An error occurred while retrieving contacts")
+
+        );
+    }
+    return res.send(documents);
+}
+
+exports.getHistory = async (req, res, next) => {
+    let document = [];
+    try {
+        const orderService = new OrderService(MongoDB.client);
+        const {name} = req.query;
+        if(name) {
+            document = await orderService.findByName(name);
+        } else{
+            document = await orderService.findById(req.params.id);
+        }
+        if(!document) {
+            console.log("Lỗi ở dòng 483 !");
+        }
+    } catch(error) {
+        console.log(error);
+        return next(new ApiError(500,"È lỗi tè le rồi"));
+    }
+    return res.send(document);
+};
+
+exports.updateOrder = async (req, res, next) => {
+    if(Object.keys(req.body).length === 0) {
+        return next(new ApiError(400, "Data to update can not be empty"));
+    }
+
+    try {
+        const orderService = new OrderService(MongoDB.client);
+        const document = await orderService.update(req.params.id, req.body);
+        if(!document) {
+            return next(new ApiError(404, "Contact not found"));
+        }
+        return res.send({ message: "Contact was updated succesfully "});
+    } catch (error) {
+        return next( new ApiError(500, "Error updating contact with id = " + req.params.id));
+    }
+};
+
+exports.deleteInvoice = async (req, res, next) => {
+    try {
+        const orderService = new OrderService(MongoDB.client);
+        const document = await orderService.delete(req.params.id);
+        if(!document) {
+            return next(new ApiError(404, "Invoice not found"));
+        }
+        return res.send({message: "Invoices was deleted successfully"});
+    } catch (error) {
+        return next(
+            new ApiError(500, "Could not delete contact with id = " + req.params.id)
+        );
+    }
+}
+
+exports.createComment = async (req,res, next) => {
+    try{ 
+        const cmtService = new CommentService(MongoDB.client);
+        const documents = await cmtService.createCmt(req.body);
+        if(!documents) {
+            console.log('Lỗi ở dòng 421');
+        }
+        return res.send(documents);
+        
+    } catch(error) {
+        console.log('An error found!',error)
+        return next(
+            new ApiError(500, "Đã xải ra lỗi khi thêm một đánh giá")
+        );
+    }
+};
+
+exports.getComment = async (req, res, next) => {
+    let document = [];
+    try {
+        const cmtService = new CommentService(MongoDB.client);
+            document = await cmtService.findById(req.params.id);
+        if(!document) {
+            console.log("Lỗi ở dòng 533 !");
+        }
+    } catch(error) {
+        console.log(error);
+        return next(new ApiError(500,"È lỗi tè le ở dòng 537 rồi"));
+    }
+    return res.send(document);
+};
+
+exports.sendEmail = async (req, res, next) => {
+    const {email} = req.body;
+    const contactService = new ContactService(MongoDB.client);
+    let document = await contactService.findByEmail(req.body);
+    console.log(document);
+    const transporter = nodemailer.createTransport({
+        service:'gmail',
+        auth: {
+          // TODO: replace `user` and `pass` values from <https://forwardemail.net>
+          user: "nhuthienphap@gmail.com",
+          pass: "dget rqrv vbqm jtsx",
+        },
+      });
+      
+      // async..await is not allowed in global scope, must use a wrapper
+   
+        // send mail with defined transport object
+        await transporter.sendMail({
+          from: 'nhuthienphap@gmail.com', // sender address
+          to: `${email}`, // list of receivers
+          subject: "Hello ✔", // Subject line
+          text: "Mật khẩu của bạn là " + document, // plain text body
+          html: "<b>Mật khẩu của bạn là </b>" + document, // html body
+        }, (err) => {
+            if(err) {
+                return res.json({
+                    message:'Lỗi !',
+                    err,
+                });
+            }
+            return res.json({
+                message:'Đã gửi mail thành công',
+            })
+        });
 }

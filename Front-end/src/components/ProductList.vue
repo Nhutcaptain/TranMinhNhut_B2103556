@@ -125,19 +125,25 @@ export default {
                 this.products.sort((a, b) => b.price - a.price);
             }
         },
+
+        formatNumber(number) {
+            return number.toLocaleString();
+        },
     },
     computed: {
         getForm() {
             return this.temp;
         },
         saleCost() {
-            return this.products.map(product => product.price);
+            const cost = this.products.map(product => product.price);
+            return cost;
         },
 
         originalCost() {
             return productId => {
                 const product = this.products.find(p => p._id === productId);
-                return product.onsale ? product.price * 100 / (100 - product.salerate) : product.price;
+                const cost = product.onsale ? product.price * 100 / (100 - product.salerate) : product.price;
+                return this.formatNumber(cost);
             };
         },
     },
@@ -171,10 +177,10 @@ export default {
                 Xem chi tiết</span>
             <div class="price">
                 <div :class="{ 'item-price': !product.onsale, 'non-item-price': product.onsale }">
-                    Giá: {{ originalCost(product._id) }}
+                    Giá: {{ originalCost(product._id) }} VNĐ
                 </div>
                 <div :class="{ 'item-price-sale': product.onsale, 'non-item-price-sale': !product.onsale }">
-                    Giá: {{ saleCost[index] }}
+                    Giá: {{ saleCost[index] }} VNĐ
                 </div>
             </div>
             <div v-if="!this.user.admin">

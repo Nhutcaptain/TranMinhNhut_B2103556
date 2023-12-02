@@ -1,21 +1,6 @@
 
 <template>
-    <!-- <div class="container">
-        <div class="overlay-container">
-            <div class="overlay">
-                <div class="author regis" id="regis">
-                    <h4>Đăng ký</h4>
-                    <regisForm :contact="contact" @submit:contact="createContact" />
-                    <p>{{ message }}</p>
-                </div>
-                <div class="author login" id="login">
-                    <h4>Đăng nhập</h4>
-                    <LoginForm :users="users" @submit:users="getUsers"/>
-                </div>
-            </div>
-        </div>
-    </div> -->
-    <div class="welcome-app">
+    <!-- <div class="welcome-app">
         <div class="container" id="container">
             <div class="form-container sign-up-container">
                 <regisForm :contact="contact" @submit:contact="createContact" />
@@ -39,6 +24,52 @@
                 </div>
             </div>
         </div>
+    </div> -->
+    <div class="login-page">
+        <div class="wrapper">
+            <div class="form-box login">
+                <h2>Login</h2>
+                <LoginForm :users="users" @submit:users="getUsers" />
+                <div class="login-register" style="text-align: center;">
+                    <p>Bạn chưa có tài khoản?<i class="register-link" @click="changeSignin">Đăng kí</i></p>
+                </div>
+                <div class="forgot-password" data-bs-toggle="modal" data-bs-target="#forgotPassword">
+                    <p>Quên mật khẩu</p>
+                </div>
+            </div>
+            <div class="form-box register">
+                <h2>Đăng ký</h2>
+                <regisForm :contact="contact" @submit:contact="createContact" />
+                <div class="register-login" style="text-align: center;">
+                    <p>Bạn đã có tài khoản?<i class="login-link" @click="changeSignup">Đăng nhập</i></p>
+                    
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="forgotPassword">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Bạn quên mật khẩu?</h2>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="input-email-forgot">
+                            <input type="email" placeholder="Vui lòng nhập email" class="form-control" name="forgotEmail" ref="forgotEmail">
+                        </div>
+                        <div class="confirm-email" style="margin-top: 10px;">
+                            <button class="btn btn-primary" @click="sendRequie">Gửi</button>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="edit">
+                            <i class="fa-solid fa-pen-to-square" @click="doEdit" data-bs-toggle="modal"
+                                data-bs-target="#myModal3" v-if="checkAdmin"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -46,8 +77,8 @@
 import regisForm from "@/components/regisForm.vue";
 import ContactService from "@/services/bookstore.service";
 import LoginForm from "../components/loginForm.vue";
-import toggleTab from "../script/toggleTab";
 import Swal from 'sweetalert2'
+import bookstoreService from "../services/bookstore.service";
 
 
 export default {
@@ -70,6 +101,9 @@ export default {
                 password: "",
             },
             listUsers: [],
+            forgotMail: {
+                email:'',
+            },
         };
     },
 
@@ -133,10 +167,71 @@ export default {
                 console.log(error);
             }
         },
+
+        changeSignin() {
+            const wrapper = document.querySelector('.wrapper');
+                wrapper.classList.add('active');
+        },
+        changeSignup() {
+            this.retriveUser();
+            const wrapper = document.querySelector('.wrapper');
+            wrapper.classList.remove('active');
+        },
+        async sendRequie() {
+            this.forgotMail.email = this.$refs.forgotEmail.value;
+            await bookstoreService.sendRequireMail(this.forgotMail);
+        },
     },
     mounted() {
         this.retriveUser();
-        toggleTab();
+
     },
 }
 </script>
+
+<style>
+    .sign-up-container{
+        overflow: auto;
+    }
+    .forgot-password{
+        position: absolute;
+        right: 30%;
+        color: rgb(175, 19, 157);
+        font-family: 'Courier New', Courier, monospace;
+        font-weight: bold;
+        cursor: pointer;
+        & p{
+            font-weight: bold;
+            padding: 5px;
+            &:hover{
+                background: rgba(0, 217, 255, 0.308);
+                border-radius: 5px;
+                transition: .5s ease;
+            }
+        }
+    }
+    .login-register{
+        margin-top: 10px;
+        & p{
+            font-size: 15px;
+            font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+            & i{
+                color: blue;
+                font-weight: bold;
+                cursor: pointer;
+            }
+        }
+    }
+    .register-login{
+        margin-top: 10px;
+        & p{
+            font-size: 15px;
+            font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+            & i{
+                color: blue;
+                font-weight: bold;
+                cursor: pointer;
+            }
+        }
+    }
+</style>

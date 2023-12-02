@@ -1,92 +1,104 @@
 <template>
-     <Form
-        @submit="submitUser"
-        :validation-schema="contactFormSchema"
-    >
-    <h2>Đăng nhập</h2>
-    <div class="input-section">
-        <Field
-            name="email"
-            type= "email"
-            class="user-input"
-            v-model="userLocal.email"
-            placeholder="Nhập emai"
-        />
-    </div>
-    <ErrorMessage name="email" class="error-feedback"/>
-    <div class="input-section">
-        <Field
-            name="password"
-            type="password"
-            class="user-input"
-            v-model="userLocal.password"
-            placeholder="Nhập mật khẩu"
-        >
-        </Field>
+    <Form @submit="submitUser">
+
+        <div class="input-section">
+            <Field name="email" type="email" class="form-control" v-model="userLocal.email" placeholder="Nhập emai" />
+            <i class="fa-regular fa-envelope icon-letter"></i>
+        </div>
         
-    </div>
-    <ErrorMessage name="password" class="error-feedback"/>
-    <p id="forgot-password">Quên mật khẩu</p>
-    <div class="form-group">
-        <button class="btn btn-primary" >Đăng nhập</button>
-    </div>
+        <div class="input-section">
+            <Field name="password" type="password" class="form-control" id="passWord" v-model="userLocal.password"
+                placeholder="Nhập mật khẩu" /> 
+                <i class="fa-solid fa-lock icon-lock"></i>
+        </div>
+        <div class="show-password">
+            <i class="fa-regular fa-eye" @click="showPassword" v-if="!showpass"></i>
+            <i class="fa-regular fa-eye-slash" @click="showPassword" v-if="showpass"></i>
+        </div>
+        <!-- <p id="forgot-password">Quên mật khẩu</p> -->
+        <div class="form-group">
+            <button class="btn btn-primary">Đăng nhập</button>
+        </div>
     </Form>
-    
+
+    <!-- Quên mật khẩu -->
 </template>
 
 <script>
-    import {Form, Field, ErrorMessage} from "vee-validate";
-    import bookstoreService from "../services/bookstore.service";
-    import * as yup from "yup";
+import { Form, Field, ErrorMessage } from "vee-validate";
+import bookstoreService from "../services/bookstore.service";
+import * as yup from "yup";
 
-    export default {
-        components: {
-            Form,
-            Field,
-            ErrorMessage,
+export default {
+    components: {
+        Form,
+        Field,
+        ErrorMessage,
+    },
+    emits: ["submit:users"],
+    props: {
+        users: { type: Object, require: true },
+    },
+    data() {
+        return {
+            userLocal: this.users,
+            showpass: false,
+        };
+    },
+    methods: {
+        submitUser() {
+            // for(let i = 0; i < this.listUser.length; i++) {
+            //     if(this.userLocal.email == this.listUser[i].email && this.userLocal.password == this.listUser[i].password){
+            //         alert("Đăng nhập thành công");
+            //         this.$emit("submit:user",this.userLocal);
+            //     } else return;
+            // }
+            this.$emit("submit:users", this.userLocal);
+
         },
-        emits :["submit:users"],
-        props: {
-            users: {type: Object, require: true},
+        showPassword() {
+            const PassInput = document.getElementById('passWord');
+            if (PassInput.type === "password") {
+                this.showpass = true;
+                PassInput.type = "text";
+            } else {
+                this.showpass = false;
+                PassInput.type = 'password';
+            }
+
         },
-        data() {
-            const contactFormSchema = yup.object().shape({
-                email: yup
-                    .string()
-                    .required("*Vui lòng điền email")
-                    .email("Email không đúng")
-                    .max(50, "Email tối đa 50 ký tự"),
-                password: yup
-                    .string()
-                    .required("*Vui lòng điền password"),
-                    
-            });
-            return {
-                userLocal: this.users,
-                contactFormSchema,
-            };
-        },
-        methods: {
-            submitUser() {
-                // for(let i = 0; i < this.listUser.length; i++) {
-                //     if(this.userLocal.email == this.listUser[i].email && this.userLocal.password == this.listUser[i].password){
-                //         alert("Đăng nhập thành công");
-                //         this.$emit("submit:user",this.userLocal);
-                //     } else return;
-                // }
-                this.$emit("submit:users", this.userLocal);
-                
-            },       
-        },
-       
-    }
+    },
+
+}
 </script>
 
 <style scoped>
-    .user-input{
-        margin:10px 10px;
+.form-control {
+    border: none;
+    outline: none;
+}
+
+.input-section{
+    width: 250px;
+    border-bottom: 2px solid;
+    margin: 10px 0;
+    & i{
+        position: absolute;
+        right: 20%;
     }
-    .error-feedback{
-        color: red;
-    }
+}
+.icon-lock{
+    top: 47%;
+}
+.icon-letter{
+    top: 26%;
+}
+
+.show-password {
+    position: relative;
+    font-size: 20px;
+    right: -160px;
+    top: -43px;
+}
+
 </style>

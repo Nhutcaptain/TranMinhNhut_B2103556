@@ -15,6 +15,7 @@ class ProductService {
             img: payload.img,
             describe: payload.describe,
             salerate: payload.salerate,
+            revenue: payload.revenue,
             onsale: payload.onsale,
         };
 
@@ -25,11 +26,10 @@ class ProductService {
     }
 
     async createProduct(payload) {
-        
         const products = this.extractProductData(payload);
         const result = await this.Product.findOneAndUpdate(
             products,
-            { $set: { onsale: products.onsale === true} },
+            { $set: { onsale: products.onsale === true, revenue: products.revenue === 0} },
             { returnDocument: "after", upsert: true}
         );
         return result;

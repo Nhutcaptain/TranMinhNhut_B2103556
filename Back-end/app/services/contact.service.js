@@ -12,9 +12,7 @@ class ContactService {
             address: payload.address,
             phone: payload.phone,
             password: payload.password,
-            // gen: payload.gen,
-            // birthday: payload.birthday,
-            // password: payload.password,
+            avatar: payload.avatar,
             admin: payload.admin
         };
 
@@ -28,7 +26,7 @@ class ContactService {
         const users = this.extractContactData(payload);
         const result = await this.Contact.findOneAndUpdate(
             users,
-            { $set: { admin: users.admin === true} },
+            { $set: { admin: users.admin === true, avatar: users.avatar === null} },
             { returnDocument: "after", upsert: true}
         );
         return result;
@@ -46,10 +44,21 @@ class ContactService {
     }
 
     async findByEmail(email) {
-        return await this.find({
-            email: {$regex: new RegExp(email), $options:"i"},
-        });
+        try{
+            const query = {email: email};
+            console.log(query);
+            const result = await this.Contact.findOne(email, 'password');
+            return result.password;
+        }catch(error) {
+            console.log(error);
+        }
     }
+
+    // async findByEmail(email) {
+    //     return await this.find({
+    //         email: {$regex: new RegExp(email), $options:"i"},
+    //     });
+    // }
 
     async findById(id) {
         return await this.Contact.findOne({

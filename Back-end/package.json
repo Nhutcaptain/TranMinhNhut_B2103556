@@ -7,7 +7,6 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon server.js",
     "webapp": "concurrently \"npm --prefix D:/B2103556_TranhMinhNhut/Back-end start\" \"npm --prefix D:/B2103556_TranhMinhNhut/Front-end run dev\""
-
   },
   "author": "",
   "license": "ISC",
@@ -17,7 +16,8 @@
     "http-errors": "^2.0.0",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.1.0",
-    "multer": "^1.4.5-lts.1"
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.9.7"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",

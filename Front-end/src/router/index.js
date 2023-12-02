@@ -19,6 +19,7 @@ const routes = [
         path: "/manager",
         name: "manager",
         component: () => import("@/views/Manager.vue"),
+        props: (route) => ({ userID: route.query.userID })
     },
     
     {
@@ -36,10 +37,22 @@ const routes = [
     },
 
     {
-        path: "/home/:productId/:userId/edit",
+        path: "/home/:productId/edit",
         name: "editor",
         component: () => import("@/views/Editor.vue"),
         props: true
+    },
+    {
+        path: '/manager/invoice/',
+        name: 'invoice',
+        component: () => import('@/views/InvoiceProcessing.vue'),
+    },
+
+    {
+        path: '/manager/product/',
+        name: 'productManager',
+        component: () => import('@/views/ProductManager.vue'),
+        props: (route) => ({ userID: route.query.userID })
     },
     
 ];
