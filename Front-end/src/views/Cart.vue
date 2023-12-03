@@ -8,7 +8,7 @@
             </div>
         </div>
         
-    <ShowCart :products="products" v-model:activeIndex="activeIndex"></ShowCart>
+    <ShowCart :products="products" v-model:activeIndex="activeIndex" @refresh-orderbill="retriveOrderBill"></ShowCart>
     <div class="modal fade" id="myModalShowHistory">
             <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
                 <div class="modal-content">

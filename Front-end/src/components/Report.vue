@@ -74,6 +74,7 @@ export default {
             this.newPost.content = this.comment;
             this.newPost.ngaydang = formattedDate;
             bookstoreService.postComment(this.newPost);
+            this.retriveReport();
         }
     },
     mounted() {

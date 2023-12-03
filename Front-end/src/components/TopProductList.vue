@@ -199,12 +199,12 @@ export default {
                 <AddtoCart :userId="this.userId" :productId="product._id" v-model="getCountKey"></AddtoCart>
             </div>
             <button v-if="this.user.admin" class="on-sale" @click="getProductSale(product._id)" data-bs-toggle="modal"
-                data-bs-target="#myModal2">Sale</button>
+                data-bs-target="#myModalonTopProduct">Sale</button>
             <button v-if="product.onsale" class="sale">-{{ product.salerate }}%</button>
         </li>
     </ul>
 
-    <div class="modal fade" id="myModal2">
+    <div class="modal fade" id="myModalonTopProduct">
         <div class="modal-dialog modal-dialog-centered modal-sm">
             <div class="modal-content">
 

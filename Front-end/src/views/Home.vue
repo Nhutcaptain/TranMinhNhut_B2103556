@@ -118,14 +118,14 @@
     <div class="app-body">
         <div class="highlighted-products"  v-if="!searchText" @click="changeProductClick('topProduct')">
             <h2>Top sản phẩm nổi bật</h2>
-            <ProductList :products="topProducts" v-model:activeIndex="activeIndex" :userId="getId" v-model="keyCount"
-                :getCheck="getCheck" >
-            </ProductList>
+            <TopProductList :products="topProducts" v-model:activeIndex="activeIndex" :userId="getId" v-model="keyCount"
+                :getCheck="getCheck" @refresh-list="refreshList">
+            </TopProductList>
         </div>
         <h2>Tất cả sản phẩm</h2>
         <div class="all-product" @click="changeProductClick('')">
-            <ProductList ref="productList" :products="filteredProduct" v-model:activeIndex="activeIndex" :userId="getId"
-            v-model="keyCount" :getCheck="getCheck" @product-id-selected="handleProductIdSelected">
+            <ProductList ref="productList" :products="sortedProduct" v-model:activeIndex="activeIndex" :userId="getId"
+            v-model="keyCount" :getCheck="getCheck" @product-id-selected="handleProductIdSelected" @refresh-list="refreshList">
         </ProductList>
         </div>
 
@@ -196,6 +196,7 @@ import Swal from 'sweetalert2';
 import unidecode from 'unidecode';
 import Detail from '../components/Detail.vue';
 import { Tooltip } from 'bootstrap';
+import TopProductList from '../components/TopProductList.vue';
 
 export default {
     props: {
@@ -211,6 +212,7 @@ export default {
         CartCount,
         Detail,
         regisForm,
+        TopProductList,
     },
     watch: {
         keyCount() {
@@ -278,6 +280,9 @@ export default {
         getId() {
             return this.id;
         },
+        sortedProduct() {
+            return this.filteredProduct.slice().reverse();
+        },
         
     },
     methods: {
@@ -285,18 +290,29 @@ export default {
             try {
                 bookstoreService.createProduct(this.product);
                 Swal.fire({
-                    title: "Good job!",
-                    text: "You clicked the button!",
+                    title: "Thêm sách thành công!",
+                    text: "Bạn đã thêm một sách mới vào cửa hàng",
                     icon: "success",
                     showConfirmButton: true,
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        location.reload();
+                        this.refreshList();
+                        this.resetProduct();
+                        console.log(this.product);
                     }
                 });
 
             } catch (error) {
                 console.log(error);
+            }
+        },
+        resetProduct() {
+            this.product = {
+                name: '',
+                price: '',
+                img: null,
+                describe: '',
+                author: '',
             }
         },
         async retrieveProducts() {
@@ -437,8 +453,8 @@ export default {
                 const productIdInTopProducts = this.topProducts[this.activeIndex]._id;
                 return this.products.findIndex((product) => product._id === productIdInTopProducts);
             }
-            if(this.productClick == 'newProduct') {
-                const productIdInTopProducts = this.newProducts[this.activeIndex]._id;
+            if(this.productClick == '') {
+                const productIdInTopProducts = this.sortedProduct[this.activeIndex]._id;
                 return this.products.findIndex((product) => product._id === productIdInTopProducts);
             }
             return this.activeIndex;

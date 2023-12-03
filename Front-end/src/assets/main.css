@@ -846,6 +846,7 @@ footer a {
 		height: 300px;
 		padding: 10px;
 		box-shadow: 10px 10px 5px rgb(25, 27, 27);
+		overflow: auto;
 }
 
 .edit{

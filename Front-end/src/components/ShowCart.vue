@@ -1,7 +1,7 @@
 <template>
     <ul class="cart-list">
        
-        <li class="cart-list-item" v-for="(product, index) in products" :key="product._id"
+        <li class="cart-list-item" v-for="(product, index) in sortedCarts" :key="product._id"
             :class="{ active: index === activeIndex }">
             <div class="items">
                 <div class="img-item">
@@ -116,6 +116,11 @@ export default {
             }
         }
     },
+    computed: {
+        sortedCarts() {
+            return this.products.slice().reverse();
+        }
+    },
     methods: {
         getDeleted(index) {
             if (!this.deleted) {
@@ -133,7 +138,8 @@ export default {
             });
         },
         getTempIndex(index) {
-            this.tempIndex = index;
+            const productIdInTopProducts = this.sortedCarts[index]._id;
+                this.tempIndex = this.products.findIndex((product) => product._id === productIdInTopProducts);
         },
         async cashPayAlert() {
             let localProduct = this.products[this.tempIndex];
@@ -162,6 +168,7 @@ export default {
                     const user = await bookstoreService.get(localProduct.userID);
                     this.order.username = user.name;
                     await bookstoreService.createOrder(this.order);
+                    this.$emit('refresh-orderbill');
                 }
             } catch (error) {
                 console.log(error);
@@ -244,6 +251,12 @@ export default {
 
 .trash-icon {
     cursor: pointer;
+}
+.describe-item{
+    width: 350px;
+    text-align: justify;
+    max-height: 200px;
+    overflow: auto;
 }
 
 

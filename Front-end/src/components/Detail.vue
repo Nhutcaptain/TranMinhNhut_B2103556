@@ -16,12 +16,20 @@ export default {
             user: [],
         }
     },
+    computed: {
+        formatedCost() {
+            return this.formatNumber(this.productDetail.price);
+        }
+    },
     methods: {
         async check() {
             this.user = await bookstoreService.get(this.userID);
             console.log(this.user);
             this.isAdmin = this.user.admin;
-        }
+        },
+        formatNumber(number) {
+            return number.toLocaleString();
+        },
     },
     mounted() {
         this.check();
@@ -45,10 +53,10 @@ export default {
             </div>
             <div class="p-1">
                 <strong>Giá:</strong>
-                {{ this.productDetail.price }}
+                {{ formatedCost }} VNĐ
             </div>
-            <div class="p-1">
-                <strong>Mô tả</strong>
+            <div class="p-1 content">
+                <strong>Mô tả: </strong>
                 {{ this.productDetail.describe }}
             </div>
         </div>
@@ -80,6 +88,9 @@ export default {
 }
 .comment-box{
     margin-top: 40px;
+}
+.content{
+    text-align: justify;
 }
 /* .editor {
     position: absolute;
