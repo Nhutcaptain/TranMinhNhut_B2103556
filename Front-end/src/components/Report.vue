@@ -61,7 +61,7 @@ export default {
             this.user = await bookstoreService.get(this.userId);
         },
 
-        postComment() {
+        async postComment() {
             const currentDate = new Date();
             const day = currentDate.getDate();
             const month = currentDate.getMonth() + 1; // Tháng bắt đầu từ 0
@@ -73,7 +73,7 @@ export default {
             this.newPost.productId = this.productId;
             this.newPost.content = this.comment;
             this.newPost.ngaydang = formattedDate;
-            bookstoreService.postComment(this.newPost);
+            await bookstoreService.postComment(this.newPost);
             this.retriveReport();
         }
     },

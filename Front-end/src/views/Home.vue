@@ -307,13 +307,11 @@ export default {
             }
         },
         resetProduct() {
-            this.product = {
-                name: '',
-                price: '',
-                img: null,
-                describe: '',
-                author: '',
-            }
+            this.product.name = '';
+            this.product.price = '';
+            this.product.img = null;
+            this.product.author = '';
+            this.product.describe = '';
         },
         async retrieveProducts() {
             try {

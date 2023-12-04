@@ -28,7 +28,7 @@
     <div class="login-page">
         <div class="wrapper">
             <div class="form-box login">
-                <h2>Login</h2>
+                <h2>Đăng nhập</h2>
                 <LoginForm :users="users" @submit:users="getUsers" />
                 <div class="login-register" style="text-align: center;">
                     <p>Bạn chưa có tài khoản?<i class="register-link" @click="changeSignin">Đăng kí</i></p>
@@ -55,7 +55,7 @@
                     </div>
                     <div class="modal-body">
                         <div class="input-email-forgot">
-                            <input type="email" placeholder="Vui lòng nhập email" class="form-control" name="forgotEmail" ref="forgotEmail">
+                            <input type="email" placeholder="Vui lòng nhập email" class="form-control" name="forgotEmail" ref="forgotEmail" @keyup.enter="sendRequie">
                         </div>
                         <div class="confirm-email" style="margin-top: 10px;">
                             <button class="btn btn-primary" @click="sendRequie">Gửi</button>
@@ -179,7 +179,17 @@ export default {
         },
         async sendRequie() {
             this.forgotMail.email = this.$refs.forgotEmail.value;
-            await bookstoreService.sendRequireMail(this.forgotMail);
+            this.listUsers.forEach(async user => {
+                if(this.forgotMail.email == user.email) {
+                    await bookstoreService.sendRequireMail(this.forgotMail);
+                    return;
+                } 
+            })
+            Swal.fire({
+                        icon: "warning",
+                        title: "Oops...",
+                        text: "Email sai hoặc chưa được đăng kí!",
+                    });
         },
     },
     mounted() {
