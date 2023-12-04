@@ -104,6 +104,7 @@ export default {
             forgotMail: {
                 email:'',
             },
+            check:false,
         };
     },
 
@@ -179,17 +180,27 @@ export default {
         },
         async sendRequie() {
             this.forgotMail.email = this.$refs.forgotEmail.value;
-            this.listUsers.forEach(async user => {
+            for (const user of this.listUsers){
                 if(this.forgotMail.email == user.email) {
+                    console.log("Đúng");
                     await bookstoreService.sendRequireMail(this.forgotMail);
-                    return;
+                    this.check= true;
+                    Swal.fire({
+                        icon: "info",
+                        title: "Hãy kiểm tra Email của bạn",
+                        text: "Chúng tôi đã gửi mật khẩu đến Email của bạn",
+                    });
+                    break;
                 } 
-            })
-            Swal.fire({
+                this.check = false;
+            }
+            if(!this.check) {
+                Swal.fire({
                         icon: "warning",
                         title: "Oops...",
                         text: "Email sai hoặc chưa được đăng kí!",
                     });
+            }
         },
     },
     mounted() {
