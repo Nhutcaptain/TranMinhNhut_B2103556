@@ -13,31 +13,43 @@
                 </div>
                 <div class="item name">
                     <strong>Tên sản phẩm</strong>
-                    <div class="click-product-name" @click="updateProductID(invoice.productId)" data-bs-toggle="modal"
-                    data-bs-target="#detailModal">
-                        {{ invoice.name }}
-                    </div>
+                    <ul class="bill-items ps-0">
+                        <li class="bill-items-list bill-name" v-for="(items, index) in invoice.items">
+                            <div class="details2">
+                                <div class="click-product-name" @click="updateProductID(items.productId)"
+                                    data-bs-toggle="modal" data-bs-target="#detailModal">
+                                    {{ items.name }}
+                                </div>
+
+                            </div>
+                        </li>
+                    </ul>
                 </div>
                 <div class="item item-count">
                     <strong>Số lượng</strong>
-                    {{ invoice.count }}
+                    <ul class="bill-items ps-0">
+                        <li class="bill-items-list" v-for="(items, index) in invoice.items">
+                            {{ items.count }}
+                        </li>
+                    </ul>
                 </div>
                 <div class="item item-price">
                     <strong>Giá</strong>
-                    {{ invoice.price * invoice.count }}
+                    {{ cost(invoice.tongtien) }}đ
                 </div>
                 <div class="item date">
                     <strong>Ngày thanh toán</strong>
                     {{ invoice.ngaythem }}
                 </div>
                 <div class="buttons">
-                    <button class='btn btn-danger' @click="confirmed(index, invoice.userID, invoice.productId)" v-if="!invoice.confirmed">Xác nhận</button>
+                    <button class='btn btn-danger' @click="confirmed(index, invoice.userID)"
+                        v-if="!invoice.confirmed">Xác nhận</button>
                     <button class="btn btn-secondary" v-if="invoice.confirmed">Đã xác nhận</button>
                 </div>
                 <div class="form-check2" v-if="getCheck && invoice.confirmed">
-                <input name="deleteInvoice" type="checkbox" class="form-check-input2" :value="invoice._id"
-                    v-model="selectedInvoices">
-            </div>
+                    <input name="deleteInvoice" type="checkbox" class="form-check-input2" :value="invoice._id"
+                        v-model="selectedInvoices">
+                </div>
             </div>
         </li>
     </ul>
@@ -47,45 +59,52 @@ import bookstoreService from '../services/bookstore.service';
 export default {
     props: {
         orderBill: { type: Object, default: [] },
-        activeIndex: {type: Number, default: -1},
+        activeIndex: { type: Number, default: -1 },
         userID: { type: String, default: null },
-        productId: {type: String, default: null},
+        productId: { type: String, default: null },
         getCheck: { type: Boolean, default: false },
     },
     data() {
         return {
-            cart:'',
-            selectedInvoices:[],
+            cart: '',
+            selectedInvoices: [],
 
         }
     },
     emits: ['update:userID', 'update:productId'],
     watch: {
-        selectedInvoices(newValue){
+        selectedInvoices(newValue) {
             this.$emit('invoice-id-selected', newValue);
         },
     },
     computed: {
         sortedOrderBill() {
-            // Sắp xếp orderBill theo index giảm dần
             return this.orderBill.slice().reverse();
         },
+        cost() {
+            return invoiceCost => {
+                return this.formatNumber(invoiceCost);
+            }
+        }
     },
     methods: {
         updateUserID(id) {
             this.$emit('update:userID', id);
         },
-        async confirmed(index, userID, productId) {
+        async confirmed(index, userID) {
             const temp = this.orderBill.slice().reverse();
-            if(!temp[index].confirmed){
-                this.cart = await bookstoreService.getOneCart(userID, productId);
-                this.cart.vanchuyen = true;
-                await bookstoreService.updateCart(userID, productId, this.cart);
+            if (!temp[index].confirmed) {
+                for(let i = 0 ; i < temp[index].items.length; i++) {
+                    this.cart = await bookstoreService.getOneCart(userID, temp[index].items[i].productId);
+                    this.cart.vanchuyen = true;
+                    await bookstoreService.updateCart(userID, temp[index].items[i].productId, this.cart);
+                }
                 temp[index].confirmed = true;
                 await bookstoreService.updateOrder(temp[index]._id, temp[index]);
             }
         },
         updateProductID(id) {
+            console.log(id);
             this.$emit('update:productId', id);
         },
         deleteSelectedProducts() {
@@ -93,6 +112,9 @@ export default {
             this.$emit('delete-selected-products', this.selectedInvoices);
             // Đặt lại danh sách selectedProducts
             this.selectedInvoices = [];
+        },
+        formatNumber(number) {
+            return number.toLocaleString();
         },
     },
 }
@@ -110,6 +132,7 @@ export default {
     border: 2px solid rgb(142, 142, 249);
     border-radius: 5px;
     width: 750px;
+    max-height: 300px;
 }
 
 .details {
@@ -118,21 +141,34 @@ export default {
     margin-left: 20px;
     max-width: 700px;
     width: 750px;
+    max-height: 300px;
+
+}
+
+.details2 {
+    display: flex;
+}
+
+ul {
+    list-style: none;
 }
 
 .item {
-    margin-right: 10px;
     display: flex;
+    text-align: center;
     flex-direction: column;
     width: 100px;
     border-right: 2px solid rgb(142, 142, 249);
     box-sizing: border-box;
-    height: 80px;
+    max-height: 300px;
 }
 
 .username {
+    position: relative;
     width: 130px;
     cursor: pointer;
+    overflow: auto;
+    display: flex;
 }
 
 .name {
@@ -140,28 +176,39 @@ export default {
     cursor: pointer;
 }
 
-.click-product-name:hover{
+.bill-name{
+    overflow: hidden;
+    height: 50px;
+    text-overflow: ellipsis;
+}
+.bill-items-list{
+    border-bottom:2px solid rgb(142, 142, 249) ;
+    height: 50px;
+}
+.click-product-name:hover {
     background-color: aliceblue;
 }
 
 .date {
-    width: 140px;
+    width: 160px;
     align-items: center;
     text-align: center;
 }
 
 .item-price {
-    width: 75px;
+    width: 100px;
 }
 
 .item-count {
     text-align: center;
-    width: 75px;
+    width: 80px;
+    display: flex;
 }
 
 .buttons {
     position: relative;
     top: 5px;
+    margin-left: 10px;
 }
 
 .btn-danger {
@@ -174,18 +221,20 @@ export default {
     background-color: aliceblue;
 }
 
-.btn-secondary{
+.btn-secondary {
     pointer-events: none;
     opacity: .7;
     width: 110px;
     font-size: 13px;
 }
-.form-check2{
+
+.form-check2 {
     position: absolute;
     right: -4%;
     width: 20px;
     height: 15px;
-    & input{
+
+    & input {
         width: 100%;
         height: 100%;
     }

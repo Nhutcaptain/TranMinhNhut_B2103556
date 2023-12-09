@@ -6,15 +6,18 @@ class OrderService {
      }
      extractOrderData(payload) {
         const order = {
-            productId: payload.productId,
             userID: payload.userID,
-            username:payload.username,
-            name: payload.name,
-            price: payload.price,
-            count: payload.count,
-            img: payload.img,
+            username: payload.username,
+            items: payload.items.map(item => ({
+                name: item.name,
+                price: item.price,
+                count: item.count,
+                img: item.img,
+                productId: item.productId,
+            })),
             confirmed: payload.confirmed,
             ngaythem: payload.ngaythem,
+            tongtien: payload.tongtien,
         };
         Object.keys(order).forEach(
             (key) => order[key] === undefined && delete order[key]

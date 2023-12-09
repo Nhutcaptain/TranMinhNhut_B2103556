@@ -26,7 +26,7 @@
                     <div class="item-detail">
                         <strong>Tổng:</strong> {{ formatNumber(product.price * product.count) }} VNĐ
                     </div>
-                    <i class="fa-solid fa-trash trash-icon" @click="getDeleted(index)" data-bs-toggle="modal"
+                    <i class="fa-solid fa-trash trash-icon" @click="getDeleted(product._id)" data-bs-toggle="modal"
                         data-bs-target="#myModal"></i>
                 </div>
                 <div class="describe-item">
@@ -39,6 +39,10 @@
                 </div>
                 <div class="accepted" v-if="product.vanchuyen">
                     <p style="font-weight: bold;">Đang vận chuyển...</p>
+                </div>
+                <div class="form-check2" v-if="getCheck && !product.bought">
+                    <input name="deleteInvoice" type="checkbox" class="form-check-input2" :value="product._id"
+                        v-model="selectedCart">
                 </div>
             </div>
 
@@ -98,6 +102,7 @@ export default {
     props: {
         products: { type: Object, default: [] },
         activeIndex: { type: Number, default: -1 },
+        getCheck: {type: Boolean, default: false},
     },
     data() {
         return {
@@ -106,14 +111,14 @@ export default {
             tempIndex: null,
             cost:'',
             order: {
+                username: '',
                 userID: '',
-                productId:'',
-                name:'',
-                price:'',
-                count:'',
-                confirmed:'',
-                ngaythem:'',
-            }
+                confirmed: false,
+                ngaythem: '',
+                tongtien: 0,
+                items: [],
+            },
+            selectedCart:[],
         }
     },
     computed: {
@@ -121,11 +126,16 @@ export default {
             return this.products.slice().reverse();
         }
     },
+    watch: {
+        selectedCart(newValue) {
+            this.$emit('invoice-id-selected', newValue);
+        },
+    },
     methods: {
-        getDeleted(index) {
+        getDeleted(id) {
             if (!this.deleted) {
                 this.deleted = true;
-                this.productid = this.products[index]._id;
+                this.productid = id;
             } else {
                 this.deleted = false;
             }
@@ -136,6 +146,12 @@ export default {
                 text: "Chức năng này sẽ được phát triển trong tương lai!",
                 icon: "info"
             });
+        },
+        deleteSelectedProducts() {
+            // Gửi danh sách selectedProducts về ParentComponent
+            this.$emit('delete-selected-products', this.selectedCart);
+            // Đặt lại danh sách selectedProducts
+            this.selectedCart = [];
         },
         getTempIndex(index) {
             const productIdInTopProducts = this.sortedCarts[index]._id;
@@ -164,9 +180,19 @@ export default {
                     localProduct.bought = true;
                     localProduct.ngaythem = formattedDate;
                     await bookstoreService.deleteCartCount(localProduct._id, localProduct);
-                    this.order = localProduct;
                     const user = await bookstoreService.get(localProduct.userID);
+                    const item = {
+                        name:localProduct.name,
+                        price:localProduct.price,
+                        count:localProduct.count,
+                        img:localProduct.img,
+                        productId:localProduct.productId,
+                    }
+                    this.order.items.push(item);
+                    this.order.tongtien = localProduct.price * localProduct.count;
+                    this.order.userID = localProduct.userID;
                     this.order.username = user.name;
+                    this.order.ngaythem = formattedDate;
                     await bookstoreService.createOrder(this.order);
                     this.$emit('refresh-orderbill');
                 }
@@ -257,6 +283,17 @@ export default {
     text-align: justify;
     max-height: 200px;
     overflow: auto;
+}
+.form-check2{
+    position: absolute;
+    right: 3%;
+    bottom: 5%;
+    width: 30px;
+    height: 30px;
+    & input{
+        width: 25px;
+        height: 25px;
+    }
 }
 
 

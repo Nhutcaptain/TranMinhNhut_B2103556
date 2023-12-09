@@ -13,6 +13,7 @@ class CommnetService {
             ngaydang: payload.ngaydang,
             username: payload.username,
             userAvatar: payload.userAvatar,
+            anonymous: payload.anonymous,
             star: payload.star,
         };
 
